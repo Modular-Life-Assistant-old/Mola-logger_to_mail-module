@@ -34,7 +34,7 @@ class Module(Component):
                 self.tag = config['tag']
 
             if 'emails' in config:
-                if 'your-email@example.com' in config['emails']
+                if 'your-email@example.com' in config['emails']:
                     Log.error('is the email address example')
                     return
 
