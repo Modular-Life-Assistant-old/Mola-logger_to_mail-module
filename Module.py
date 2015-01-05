@@ -44,7 +44,7 @@ class Module(Component):
                 self.to = config['emails']
 
             if 'ignore_msg_regex' in config:
-                self.ignore_msg_regex = config['ignore']
+                self.ignore_msg_regex = config['ignore_msg_regex']
                 self.ignore_msg_regex.append('send_mail_lib') # infinite loop
 
     def log(self, event, **kwargs):
