@@ -4,9 +4,12 @@ from modules.send_mail_lib.Module import send_mail
 from circuits import Component
 import json
 import os
+import re
+
 
 class Module(Component):
     channel = 'log'
+    ignore_msg_regex = []
     min_level = 30 # no log debug / info
     tag = ''
     to = []
@@ -40,18 +43,27 @@ class Module(Component):
 
                 self.to = config['emails']
 
+            if 'ignore_msg_regex' in config:
+                self.ignore_msg_regex = config['ignore']
+                self.ignore_msg_regex.append('send_mail_lib') # infinite loop
+
     def log(self, event, **kwargs):
         if kwargs['levelno'] < self.min_level or not self.to:
             return
 
-        if 'pathname' in kwargs and 'send_mail_lib' in kwargs['pathname'] or \
-                'msg' in kwargs and 'send_mail_lib' in kwargs['msg']: # infinite loop
+        if 'pathname' in kwargs and 'send_mail_lib' in kwargs['pathname']: # infinite loop
             return
+
+        if 'msg' in kwargs: # ignore msg regex
+            for regex in self.ignore_msg_regex:
+                if re.search(regex, kwargs['msg']):
+                    return
 
         subject = '[LOG]%s[%s] %s' % (
             '[%s]' % self.tag if self.tag else '',
             kwargs['levelname'],
-            kwargs['msg'] if len(kwargs['msg']) <= 40 else kwargs['msg'][0:40-3] + '...'
+            kwargs['msg'] if len(kwargs['msg']) <= 40 else \
+                kwargs['msg'][0:40-3] + '...'
         )
         msg = 'Infos:\n'
 
